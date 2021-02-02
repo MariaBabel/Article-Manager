@@ -1,0 +1,84 @@
+@layout LoginLayout
+@page "/"
+
+@inject NavigationManager navigationManager;
+@inject AuthenticationStateProvider auth;
+@* @inject HttpClient http; *@
+
+@using article_manager.Services;
+@using article_manager.Data.Entities;
+@using backendlib.Models
+
+@inject IUserService service;
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@using article_manager.Data;
+@using System.Net.Http.Headers;
+@inject IHttpClientFactory Factory
+@inject TokenProvider TokenProvider
+
+<div class="row m-0 h-100 form-div">
+    <div class="col p-0 text-center d-flex justify-content-center align-items-center display-none">
+        <img src="../assets/img/login.svg" class="w-100">
+    </div>
+    <div class="col p-0 bg-custom d-flex justify-content-center align-items-center flex-column w-100">
+        <EditForm class="w-75" Model=User OnValidSubmit="Login">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="User" class="form-label label-login">User</label>
+                <InputText @bind-Value=User.Name class="form-control" id="User" placeholder="User" required />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label label-login">Password</label>
+                <InputText @bind-Value=User.Password type="password" class="form-control" id="password"
+                    placeholder="password" required />
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <label class="form-check-label label-login" for="flexCheckDefault">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-custom btn-lg btn-block mt-3">Login</button>
+        </EditForm>
+
+
+        <h1>@error</h1>
+
+    </div>
+</div>
+
+
+@code{
+    private string error;
+    private User User = new User();
+
+    private async Task Login()
+    {
+        string token = await service.Login(User);
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            await sessionStorage.SetItemAsync("token", token);
+            TokenProvider.AccessToken = token;
+
+            ((AuthenticationService)auth).LogIn(User.Id.ToString());
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user.Identity.IsAuthenticated)
+            {
+                navigationManager.NavigateTo("/articleCategories");
+            }
+            else
+            {
+                error = "You're not logged in.";
+            }
+        }
+    }
+}

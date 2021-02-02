@@ -1,0 +1,61 @@
+<div>This is a TabControl</div>
+
+<CascadingValue Value="this">
+    @* <div class="btn-group" role="group">
+        @foreach (TabPage tabPage in Pages)
+        {
+        <button type="button" class="btn @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>
+        @tabPage.Text
+        </button>
+        }
+        </div> *@
+
+    @* <ul class="nav nav-pills">
+        @foreach (TabPage tabPage in Pages)
+        {
+        <li class="nav-item flex-column flex-sm-row">
+        <a class="flex-sm-fill text-sm-center nav-link @GetLinkClass(tabPage)" aria-current="page" href=""
+        @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Text</a>
+        </li>
+        }
+        </ul> *@
+
+    <nav class="nav nav-pills flex-column flex-sm-row">
+        @foreach (TabPage tabPage in Pages)
+        {
+            <a class="flex-sm-fill text-sm-center nav-link @GetLinkClass(tabPage)" href="" @onclick=@(
+            () => ActivatePage(tabPage) )>@tabPage.Text</a>
+        }
+    </nav>
+
+    @ChildContent
+</CascadingValue>
+
+@code{
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    public TabPage ActivePage { get; set; }
+    List<TabPage> Pages = new List<TabPage>();
+    internal void AddPage(TabPage tabPage)
+    {
+        Pages.Add(tabPage);
+        if (Pages.Count == 1)
+            ActivePage = tabPage;
+        StateHasChanged();
+    }
+
+    string GetButtonClass(TabPage page)
+    {
+        return page == ActivePage ? "btn-primary" : "btn-secondary";
+    }
+
+    string GetLinkClass(TabPage page)
+    {
+        return page == ActivePage ? "active" : null;
+    }
+
+    void ActivatePage(TabPage page)
+    {
+        ActivePage = page;
+    }
+}

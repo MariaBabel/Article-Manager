@@ -1,0 +1,14 @@
+@inherits ArticlesBase
+
+@page "/articles"
+
+<h2>Articles</h2>
+
+<div class="mt-3">
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+</div>
